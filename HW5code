@@ -1,0 +1,77 @@
+---
+title: "AkeemHW5"
+author: "Akeem Lawrence"
+date: "2024-09-29"
+output:
+  html_document:
+    df_print: paged
+---
+For this assignment, we will take some data from a csv file for a widening and lengthening exercise.
+
+The chart below  describes arrival delays for two airlines across five destinations. Your task is to:
+(1) Create a .CSV file (or optionally, a MySQL database!) that includes all of the information above.
+
+As specified in the assignment instructions, I created a “wide” structure similar to how the information was given to us as students so that I can practice tidying and transformation
+.
+```{r csv-import}
+hw5 <- read.csv("/Users/akeemlawrence/cuny/HW5.csv", header = TRUE, sep = ",")
+```
+
+Since we will be using the tidyr and dplyr packages, I load them into our environment here.
+
+```{r load-packages}
+library(tidyr)
+library(dplyr)
+```
+
+Here I calculate the total number of delays for both Alaska Airlines, and AW West. I didn't really need to tidy the data yet, so I create a new data frame entitled "df_for_delays" with just numerical data so that I can do some basic analysis of flight delays and flights on time.
+
+I decided that analyzing which airline had the most delays, maxes and mins, and which airline had the most on time flights was a good start, since this is the most logical, and meaningful starting point. I envision an airline industry analyst comparing performance of the two airlines, or something of the sort.
+
+Here are some three simple conclusions that I drew to start:
+
+1) Alaska airlines had 501 delays compared to 787 for AW West. We can see that AW West is more timely, although it would be meaningful to see how many flights were on time as a percentage of total flights so that we can standardize the results.
+
+AW delayed %: 11%
+AW on-time %: 89%
+
+Alaska delayed %: 13%
+AW on-time %: 87%
+
+Thus, we draw the conclusion that AW West tends to be more timely by about 2% on average. Great. I can give my frequent flyer points to AW.
+
+2) From deeper analysis, we also see that AW West had 7225 total flights to Alaska's 3775, so this percentage of on-time/delayed flights is even more meaningful: AW has nearly twice as many flights with 2% less delays. Holy Cow!
+
+3) For Alaska, Seattle had the largest number of delays at 305, while Phoenix had the largest number of delays for AW West at 415.
+
+For Alaska, Seattle was the most timely city, while Phoenix was the most timely city for AW West. Interesting! We notice that the most timely cities are also the most delayed cities for each airline.
+
+```{r compare-delays}
+
+df_for_delays <- hw5 %>% select(-X, -X.1)
+alaska_delays_total <- sum(df_for_delays[2, ])
+delays_aw_total <- sum(df_for_delays[4, ])
+alaska_ontime_total <- sum(df_for_delays[1, ])
+aw_ontime_total <- sum(df_for_delays[3, ])
+
+alaska_total = alaska_delays_total+alaska_ontime_total
+aw_total = delays_aw_total+aw_ontime_total
+
+alaska_percent_delayed = alaska_delays_total/alaska_total
+aw_percent_delayed = delays_aw_total/aw_total
+
+alaska_percent_ontime = alaska_ontime_total/alaska_total
+aw_percent_ontime = aw_ontime_total/aw_total
+
+max_alaska_delays <- max(df_for_delays[2, ])
+max_aw_delays <- max(df_for_delays[4, ])
+max_alaska_ontime <- max(df_for_delays[1, ])
+max_aw_ontime <- max(df_for_delays[3, ])
+```
+
+Next I create the data frame using pivot_longer.
+
+```{r tidy-data}
+airline_data <- hw5|>pivot_longer(cols = Los.Angeles:Seattle,names_to = "City",values_to = "Flights")
+
+```
